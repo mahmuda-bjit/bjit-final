@@ -30,6 +30,7 @@ spec:
     app: spring-boot-k8s
   ports:
     - protocol: "TCP"
-      port: 8070
+      port: 8080
       targetPort: 8080
+      nodePort: 30090
   type: NodePort
