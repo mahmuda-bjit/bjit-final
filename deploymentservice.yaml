@@ -1,36 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  mysql-database: sparklmsdb
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+type: Opaque
+data:
+  mysql-root-password: cm9vdA==  # Base64-encoded value of "12345678"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: java-app-mysql
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: mysql-database
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spring-boot-k8s-deployment
 spec:
+  replicas: 2
   selector:
     matchLabels:
-      app: spring-boot-k8s
-  replicas: 2
+      app: my-webserver
   template:
     metadata:
       labels:
-        app: spring-boot-k8s
+        app: my-webserver
     spec:
       containers:
-        - name: spring-boot-k8s
+        - name: webserver
           image: mahmudakeya/spark-lms
           imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_HOST
+              value: mysql-service
+            - name: MYSQL_PORT
+              value: "3306"
           ports:
             - containerPort: 8080
-
+          volumeMounts:
+            - name: webserver-persistent-storage
+              mountPath: /var/www/html
+      volumes:
+        - name: webserver-persistent-storage
+          emptyDir: {}
 
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: springboot-k8ssvc
+  name: my-webserver-service
 spec:
   selector:
-    app: spring-boot-k8s
+    app: my-webserver
   ports:
-    - protocol: "TCP"
-      port: 8080
-      targetPort: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 80
       nodePort: 30090
   type: NodePort
