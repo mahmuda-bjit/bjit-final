@@ -32,7 +32,7 @@ spec:
         app: mysql
     spec:
       containers:
-        - name: java-app-mysql
+        - name: mysql
           image: mysql:latest
           env:
             - name: MYSQL_ROOT_PASSWORD
@@ -93,12 +93,6 @@ spec:
               value: "3306"
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: webserver-persistent-storage
-              mountPath: /var/www/html
-      volumes:
-        - name: webserver-persistent-storage
-          emptyDir: {}
 
 ---
 
