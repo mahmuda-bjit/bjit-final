@@ -110,6 +110,11 @@ spec:
             secretKeyRef:
               name: mysql-secrets
               key: root-password
+        - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mysql-config
+                key: mysql-database
         ports:
         - containerPort: 3306
         imagePullPolicy: Always
