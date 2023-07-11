@@ -21,7 +21,9 @@ spec:
   storageClassName: standard
   hostPath:
     path: /tmp/mysql
+
 ---
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -34,8 +36,8 @@ spec:
       storage: 1Gi
   storageClassName: standard
 
-
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,8 +63,8 @@ spec:
         ports:
         - containerPort: 8080
 
-
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -78,6 +80,7 @@ spec:
   type: NodePort
 
 ---
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -86,6 +89,7 @@ data:
   mysql-database: sparklmsdb
 
 ---
+
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -111,10 +115,10 @@ spec:
               name: mysql-secrets
               key: root-password
         - name: MYSQL_DATABASE
-            valueFrom:
-              configMapKeyRef:
-                name: mysql-config
-                key: mysql-database
+          valueFrom:
+            configMapKeyRef:
+              name: mysql-config
+              key: mysql-database
         ports:
         - containerPort: 3306
         imagePullPolicy: Always
@@ -127,6 +131,7 @@ spec:
           claimName: mysql-pvc
 
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
