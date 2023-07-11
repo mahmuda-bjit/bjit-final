@@ -1,4 +1,14 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secrets
+type: Opaque
+data:
+  root-password: cm9vdA== # Base64-encoded value of "root"
+
+---
+
+apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mysql-pv
@@ -71,11 +81,9 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: my-config-map
+  name: mysql-config
 data:
-  config.properties: |
-    db.username: root
-    db.name: sparklmsdb
+  mysql-database: sparklmsdb
 
 ---
 apiVersion: apps/v1
@@ -125,12 +133,3 @@ spec:
   - protocol: TCP
     port: 3306
     targetPort: 3306
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mysql-secrets
-type: Opaque
-data:
-  root-password: cm9vdA==
